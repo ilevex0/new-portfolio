@@ -1,11 +1,24 @@
-<script setup></script>
+<script setup>
+import NavBar from './components/NavBar.vue'
+
+
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <NavBar />
+  <main>
+    <section id="projects" class="section">
+      <h1>CREATIVE DEVELOPER</h1>
+      <h1>MOTION GRAPHICS</h1>
+      <h1>VIDEO EDITING</h1>
+      <h1>INTROMAKER/THUMBMAKER</h1>
+      <h1>WEB DEVELOPER</h1>
+    </section>
+  </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+main {
+  padding: 20px;
+}
+</style>
