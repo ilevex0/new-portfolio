@@ -1,17 +1,25 @@
 <template>
   <div class="hero-container">
-    <!-- 1. O Vídeo de Fundo -->
+    <!-- 1. O Fundo -->
     <img src="@/assets/imgs/Placeholder.png" class="background-video" alt="">
 
     <nav class="navbar">
       <h3 class="titleOnTop">FAZER ARTS</h3>
-      <h3 class="menuTitle" @click="isMenuOpen = true">MENU</h3>
+      
+      <!-- Adicionada a classe "menu-wrapper" para alinhar o ícone e o texto lado a lado -->
+      <h3 class="menuTitle" @click="isMenuOpen = true">
+        <span class="menu-wrapper">
+          <img src="@/assets/imgs/menu-icon.svg" class="menu-icon" alt="Menu"> 
+          MENU
+        </span>
+      </h3>
     </nav>
 
     <SideMenu 
-    :is-open="isMenuOpen" 
-    @close="isMenuOpen = false" 
-    @navigate="handleNavigation" />
+      :is-open="isMenuOpen" 
+      @close="isMenuOpen = false" 
+      @navigate="handleNavigation" 
+    />
   </div>
 </template>
 
@@ -20,27 +28,22 @@ import { ref } from 'vue'
 import SideMenu from './SideMenu.vue'
 
 const isMenuOpen = ref(false)
-const isTransitioning = ref(false) // Controla a animação de partículas
+const isTransitioning = ref(false)
 
 const handleNavigation = (sectionId) => {
-  // 1. O menu já fechou (graças ao emit 'close')
-  
-  // 2. Ativa o efeito de partículas subindo na tela
   isTransitioning.value = true
 
   setTimeout(() => {
-    // Encontra a seção na página e rola até ela
     const targetElement = document.getElementById(sectionId)
     if (targetElement) {
       targetElement.scrollIntoView({ behavior: 'smooth' })
     }
 
-    // 5. Desliga o efeito de partículas após a transição terminar
     setTimeout(() => {
       isTransitioning.value = false
     }, 500)
 
-  }, 1000) // 1 segundo de espera
+  }, 1000)
 }
 </script>
 
@@ -89,6 +92,11 @@ const handleNavigation = (sectionId) => {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
+.titleOnTop:hover {
+  opacity: 0.85;
+  transform: translateX(-50%) scale(1.03);
+}
+
 .menuTitle {
   font-family: "Rajdhani", sans-serif;
   font-weight: 400;
@@ -98,13 +106,23 @@ const handleNavigation = (sectionId) => {
   right: 80px;
   cursor: pointer;
   transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+/* Garante que o ícone e o texto fiquem perfeitamente alinhados e lado a lado */
+.menu-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-icon {
+  width: 20px;
+  height: auto;
+  display: block;
 }
 
 .menuTitle:hover {
   opacity: 0.7;
-}
-.titleOnTop:hover {
-  opacity: 0.85;
-  transform: translateX(-50%) scale(1.03);
 }
 </style>
