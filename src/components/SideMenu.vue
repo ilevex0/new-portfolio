@@ -10,9 +10,9 @@
             <button @click="close" class="close-btn">&times;</button>
 
             <nav class="sidebar-nav">
-                <a href="#" @click.prevent="selectSection('projects')" class="sideMenuText">WHO AM I</a>
-                <a href="#" @click.prevent="selectSection('projects')" class="sideMenuText">WHAT CAN I DO FOR YOU</a>
-                <a href="#" @click.prevent="selectSection('projects')" class="sideMenuText">LET'S WORK TOGETHER</a>
+                <a href="#" @click.prevent="selectSection('about')" class="sideMenuText">WHO AM I</a>
+                <a href="#" @click.prevent="selectSection('services')" class="sideMenuText">WHAT CAN I DO FOR YOU</a>
+                <a href="#" @click.prevent="selectSection('contact')" class="sideMenuText">LET'S WORK TOGETHER</a>
             </nav>
         </aside>
     </div>
@@ -31,6 +31,7 @@ const emit = defineEmits(['close', 'navigate'])
 const close = () => {
     emit('close')
 }
+
 const selectSection = (sectionId) => {
     emit('close') // Fecha o menu
     emit('navigate', sectionId) // Informa qual seção o usuário quer ir
@@ -38,18 +39,21 @@ const selectSection = (sectionId) => {
 </script>
 
 <style scoped>
-/* O link do menu com a classe específica */
+/* O link do menu ajustado para Montserrat e cores refinadas */
 .sidebar-nav a.sideMenuText {
-    font-family: "Share Tech Mono", monospace;
-    font-weight: 400;
-    font-size: 1.2rem;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
     color: #ffffff;
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
 }
 
 .sidebar-nav a.sideMenuText:hover {
     color: #38bdf8;
+    transform: translateX(6px);
 }
 
 .overlay {
@@ -58,8 +62,9 @@ const selectSection = (sectionId) => {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(11, 15, 25, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 998;
 }
 
@@ -76,54 +81,54 @@ const selectSection = (sectionId) => {
 .sidebar {
     position: fixed;
     top: 0;
-    right: -350px;
-    width: 350px;
+    right: -380px;
+    width: 380px;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(16px);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(11, 15, 25, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 999;
-    padding: 40px;
+    padding: 50px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
 .sidebar.active {
-    transform: translateX(-350px);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    transform: translateX(-380px);
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.7);
 }
 
 .close-btn {
     align-self: flex-end;
-
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: #ffffff;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
     padding: 0;
-
-    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .close-btn:hover {
-    background: rgba(56, 189, 248, 0.3);
-    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
     transform: scale(1.05);
 }
 
 .sidebar-nav {
-    margin-top: 60px;
+    margin-top: 80px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 32px;
 }
 </style>
