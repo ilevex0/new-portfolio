@@ -1,9 +1,39 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+
+// Referência para a seção inteira
+const aboutSection = ref(null)
+
+onMounted(() => {
+  const observerOptions = {
+    root: null, // Usa a viewport
+    rootMargin: '0px',
+    threshold: 0.15 // Dispara quando 15% da seção estiver visível
+  }
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Adiciona a classe que ativa as animações
+        entry.target.classList.add('is-visible')
+        // Para de observar depois que já apareceu (executa só na primeira vez)
+        observer.unobserve(entry.target)
+      }
+    })
+  }, observerOptions)
+
+  if (aboutSection.value) {
+    observer.observe(aboutSection.value)
+  }
+})
+</script>
+
 <template>
-  <section id="about" class="about-section">
+  <section ref="aboutSection" id="about" class="about-section">
     <div class="about-container">
       
       <!-- Minimalist Header -->
-      <div class="about-header">
+      <div class="about-header animate-fade-down">
         <span class="badge-subtitle">Professional PROFILE</span>
         <h2 class="main-title">METHOD, ART & TECHNOLOGY</h2>
       </div>
@@ -12,7 +42,7 @@
       <div class="about-grid">
         
         <!-- Left Column: Manifesto / Vision with Luminous Spine -->
-        <div class="manifesto-col">
+        <div class="manifesto-col animate-fade-left">
           <div class="luminous-spine"></div>
           <div class="manifesto-content">
             <h3 class="manifesto-heading">
@@ -41,15 +71,15 @@
         <!-- Right Column: Stylized Expertise List with Interactive Glow -->
         <div class="expertise-list">
           
-          <div class="expertise-item">
+          <div class="expertise-item animate-fade-right" style="--delay: 0.1s;">
             <div class="item-number text-main">01</div>
             <div class="item-content">
-              <h4>Web Development</h4>
-              <p>React, Vue, Three.js, Node.js. Focused on high-performance architecture and seamless user interfaces.</p>
+              <h4>Video & Image Editing</h4>
+              <p>Premiere Pro, DaVinci Resolve. Delivering cinematic post-production and advanced visual grading.</p>
             </div>
           </div>
 
-          <div class="expertise-item">
+          <div class="expertise-item animate-fade-right" style="--delay: 0.2s;">
             <div class="item-number text-main">02</div>
             <div class="item-content">
               <h4>Motion Graphics & 3D</h4>
@@ -57,19 +87,19 @@
             </div>
           </div>
 
-          <div class="expertise-item">
+          <div class="expertise-item animate-fade-right" style="--delay: 0.3s;">
             <div class="item-number text-main">03</div>
-            <div class="item-content">
-              <h4>Video & Image Editing</h4>
-              <p>Premiere Pro, DaVinci Resolve. Delivering cinematic post-production and advanced visual grading.</p>
-            </div>
-          </div>
-
-          <div class="expertise-item">
-            <div class="item-number text-main">04</div>
             <div class="item-content">
               <h4>Artificial Intelligence</h4>
               <p>Generative AI tools and pipelines for rapid ideation, asset creation, and automated workflows.</p>
+            </div>
+          </div>
+
+          <div class="expertise-item animate-fade-right" style="--delay: 0.4s;">
+            <div class="item-number text-main">04</div>
+            <div class="item-content">
+              <h4>Web Development</h4>
+              <p>React, Vue, Three.js, Node.js. Focused on high-performance architecture and seamless user interfaces.</p>
             </div>
           </div>
 
@@ -80,10 +110,6 @@
     </div>
   </section>
 </template>
-
-<script setup>
-// Component structured for optimal performance and lightweight rendering
-</script>
 
 <style scoped>
 .about-section {
@@ -96,6 +122,7 @@
   position: relative;
   z-index: 2;
   border-top: 1px solid rgba(56, 189, 248, 0.1);
+  overflow: hidden;
 }
 
 .about-container {
@@ -113,7 +140,7 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 3px;
-  color: #38bdf8; /* Cor Principal */
+  color: #38bdf8;
   text-transform: uppercase;
   display: block;
   margin-bottom: 12px;
@@ -148,7 +175,6 @@
 .luminous-spine {
   width: 2px;
   height: 100%;
-  /* Usando a cor principal com transparência no gradiente */
   background: linear-gradient(to bottom, #38bdf8, transparent);
   opacity: 0.5;
 }
@@ -194,11 +220,10 @@
   font-family: "Orbitron", sans-serif;
   font-size: 28px;
   font-weight: 700;
-  color: #38bdf8; /* Cor Principal */
+  color: #38bdf8;
 }
 
 .text-main {
-  /* Aplicando o efeito de brilho com a cor principal semi-transparente */
   text-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
 }
 
@@ -231,7 +256,7 @@
 
 .expertise-item:hover {
   background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(56, 189, 248, 0.5); /* Borda ao hover com cor principal */
+  border-color: rgba(56, 189, 248, 0.5);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   transform: translateX(6px);
 }
@@ -240,7 +265,7 @@
   font-family: "Orbitron", sans-serif;
   font-size: 16px;
   font-weight: 700;
-  color: #38bdf8; /* Cor Principal */
+  color: #38bdf8;
   margin-top: 2px;
 }
 
@@ -260,6 +285,39 @@
   line-height: 1.6;
   color: #94a3b8;
   margin: 0;
+}
+
+/* ==========================================
+   ANIMAÇÕES DE ENTRADA (SCROLL REVEAL)
+   ========================================== */
+
+.about-section .animate-fade-down,
+.about-section .animate-fade-left,
+.about-section .animate-fade-right {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--delay, 0s);
+}
+
+.about-section .animate-fade-down {
+  transform: translateY(-30px);
+}
+
+.about-section .animate-fade-left {
+  transform: translateX(-40px);
+}
+
+.about-section .animate-fade-right {
+  transform: translateX(40px);
+}
+
+.about-section.is-visible .animate-fade-down,
+.about-section.is-visible .animate-fade-left,
+.about-section.is-visible .animate-fade-right {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, 0);
 }
 
 /* Responsive */

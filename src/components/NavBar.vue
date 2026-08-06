@@ -1,40 +1,145 @@
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import SideMenu from './SideMenu.vue'
+
+const isMenuOpen = ref(false)
+const heroContainerRef = ref(null)
+const canvasRef = ref(null)
+const baseVideoRef = ref(null)
+const workbenchVideoRef = ref(null)
+
+let animationFrameId = null
+let isHovered = false
+
+onMounted(() => {
+  // 1. Configuração do listener de Hover via JS
+  const container = heroContainerRef.value
+  const btn = container?.querySelector('.primary-btn')
+
+  if (btn) {
+    btn.addEventListener('mouseenter', () => { isHovered = true })
+    btn.addEventListener('mouseleave', () => { isHovered = false })
+  }
+
+  // 2. Lógica de renderização do Canvas
+  const canvas = canvasRef.value
+  const baseVideo = baseVideoRef.value
+  const workbenchVideo = workbenchVideoRef.value
+
+  if (canvas && baseVideo && workbenchVideo) {
+    const ctx = canvas.getContext('2d')
+    let workbenchOpacity = 0
+
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    // Função auxiliar para desenhar o vídeo com proporção "cover"
+    const drawVideoCover = (video) => {
+      const hRatio = canvas.width / video.videoWidth
+      const vRatio = canvas.height / video.videoHeight
+      const ratio = Math.max(hRatio, vRatio)
+      
+      const centerShiftX = (canvas.width - video.videoWidth * ratio) / 2
+      const centerShiftY = (canvas.height - video.videoHeight * ratio) / 2
+      
+      ctx.drawImage(
+        video, 
+        0, 0, video.videoWidth, video.videoHeight, 
+        centerShiftX, centerShiftY, video.videoWidth * ratio, video.videoHeight * ratio
+      )
+    }
+
+    const renderFrame = () => {
+      if (baseVideo.readyState >= baseVideo.HAVE_CURRENT_DATA) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        
+        // Desenha o vídeo base por baixo
+        drawVideoCover(baseVideo)
+
+        // 🌟 VELOCIDADE DA TRANSIÇÃO:
+        // Quanto menor o número (ex: 0.04 ou 0.05), mais lenta e suave será a transição.
+        // O valor anterior era 0.15 (muito rápido).
+        const targetOpacity = isHovered ? 1 : 0
+        workbenchOpacity += (targetOpacity - workbenchOpacity) * 0.05
+
+        if (workbenchOpacity > 0.01 && workbenchVideo.readyState >= workbenchVideo.HAVE_CURRENT_DATA) {
+          ctx.save()
+          ctx.globalAlpha = workbenchOpacity
+          drawVideoCover(workbenchVideo)
+          ctx.restore()
+        }
+      }
+      animationFrameId = requestAnimationFrame(renderFrame)
+    }
+
+    // Tenta reproduzir ambos os vídeos
+    Promise.all([
+      baseVideo.play().catch(() => {}),
+      workbenchVideo.play().catch(() => {})
+    ]).then(() => {
+      renderFrame()
+    })
+  }
+})
+
+onUnmounted(() => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+})
+
+const handleNavigation = (sectionId) => {
+  const targetElement = document.getElementById(sectionId)
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth' })
+  }
+  isMenuOpen.value = false
+}
+</script>
+
 <template>
-  <div class="hero-container">
-    <!-- O Fundo 1: Base Video (Fica sempre rodando no fundo) -->
+  <div ref="heroContainerRef" class="hero-container">
+    <!-- Vídeos originais ocultos (fontes de dados para o Canvas) -->
     <video 
+      ref="baseVideoRef"
       src="@/assets/videos/hero.mp4" 
-      class="background-video" 
       autoplay 
       muted 
       loop 
       playsinline
-      disablepictureinpicture
-      controlslist="nodownload nofullscreen noremoteplayback"
+      crossorigin="anonymous"
+      style="display: none;"
     ></video>
 
-    <!-- O Fundo 2: Workbench Video (Fica por cima, invisível, e aparece no hover) -->
     <video 
+      ref="workbenchVideoRef"
       src="@/assets/videos/workbench.mp4" 
-      class="background-video workbench-video" 
       autoplay 
       muted 
       loop 
       playsinline
-      disablepictureinpicture
-      controlslist="nodownload nofullscreen noremoteplayback"
+      crossorigin="anonymous"
+      style="display: none;"
     ></video>
-    
-    <!-- Camada de Escurecimento Inteligente -->
-    <div class="hero-overlay"></div>
+
+    <!-- Fundo renderizado via Canvas -->
+    <div class="video-background">
+      <canvas ref="canvasRef" class="bg-canvas"></canvas>
+      <!-- Camada de Escurecimento Inteligente controlada pelo CSS -->
+      <div class="hero-overlay"></div>
+    </div>
 
     <!-- Navbar Minimalista de Luxo -->
     <header class="luxury-navbar">
-      
       <!-- Coluna Esquerda: Indicador de Status (Desktop) / Logo (Mobile) -->
       <div class="nav-side left">
         <div class="status-badge desktop-only">
           <span class="pulse-dot"></span>
-          <span class="status-text">AVAILABLE FOR PROJECTS</span>
+          <span class="status-text">AVAILABLE FOR WORK</span>
         </div>
         
         <!-- Logo exclusivo para mobile -->
@@ -60,7 +165,6 @@
           </div>
         </div>
       </div>
-
     </header>
 
     <!-- Conteúdo Principal do Hero (Mais limpo e direto) -->
@@ -74,7 +178,6 @@
       </h2>
 
       <div class="hero-actions">
-        <!-- O botão volta a ser simples, sem eventos de mouse do Vue -->
         <button class="primary-btn" @click="handleNavigation('projects')">
           <span>EXPLORE WORKS</span>
           <svg class="btn-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -86,27 +189,13 @@
     </div>
 
     <SideMenu 
+      v-if="isMenuOpen"
       :is-open="isMenuOpen" 
       @close="isMenuOpen = false" 
       @navigate="handleNavigation" 
     />
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-import SideMenu from './SideMenu.vue'
-
-const isMenuOpen = ref(false)
-
-const handleNavigation = (sectionId) => {
-  const targetElement = document.getElementById(sectionId)
-  if (targetElement) {
-    targetElement.scrollIntoView({ behavior: 'smooth' })
-  }
-  isMenuOpen.value = false
-}
-</script>
 
 <style scoped>
 .hero-container {
@@ -120,32 +209,26 @@ const handleNavigation = (sectionId) => {
   justify-content: center;
 }
 
-.background-video {
+/* =========================================
+   ESTILOS DO CANVAS DE FUNDO
+   ========================================= */
+.video-background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   z-index: 1;
-  transform: scale(1.01);
-  pointer-events: none;
+  overflow: hidden;
 }
 
-/* Estado inicial do vídeo workbench */
-.workbench-video {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  z-index: 2; /* Fica logo acima do vídeo base */
-}
-
-/* O "Pulo do Gato" em CSS Puro */
-/* Apenas aplica o efeito em dispositivos que têm mouse (ignora mobile/touch) */
-@media (hover: hover) and (pointer: fine) {
-  /* Se dentro do hero-container existir um botão .primary-btn com :hover, aplique isso no .workbench-video */
-  .hero-container:has(.primary-btn:hover) .workbench-video {
-    opacity: 1;
-  }
+.bg-canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
 }
 
 .hero-overlay {
@@ -154,7 +237,7 @@ const handleNavigation = (sectionId) => {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 3; /* Aumentado para ficar acima dos dois vídeos */
+  z-index: 2;
   background: rgba(7, 10, 18, 0.45);
   pointer-events: none;
 }
@@ -415,7 +498,6 @@ const handleNavigation = (sectionId) => {
   .luxury-navbar {
     padding: 0 20px;
     height: 75px;
-    grid-template-columns: 1fr auto;
   }
 
   .desktop-only {
@@ -447,7 +529,6 @@ const handleNavigation = (sectionId) => {
     justify-content: center;
   }
 
-  /* O botão mantém um tamanho controlado e só vira 100% em telas menores que 480px */
   .primary-btn {
     width: auto;
     min-width: 220px;
@@ -455,7 +536,6 @@ const handleNavigation = (sectionId) => {
   }
 }
 
-/* Ajuste dedicado para telas de smartphones bem estreitos */
 @media (max-width: 480px) {
   .hero-actions {
     padding: 0 20px;
@@ -466,13 +546,12 @@ const handleNavigation = (sectionId) => {
     width: 100%;
   }
 }
-/* Quebra intermediária para telas entre 769px e 1024px */
+
 @media (max-width: 1024px) {
   .luxury-navbar {
     padding: 0 30px;
   }
 
-  /* Oculta o status badge para liberar espaço lateral */
   .status-badge {
     display: none !important;
   }
