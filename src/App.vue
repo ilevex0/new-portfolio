@@ -7,6 +7,7 @@ import WhyHireMe from './components/WhyHireMe.vue';
 import FaqSection from './components/FaqSection.vue';
 import DevBanner from './components/DevBanner.vue';
 import ProjectsSection from './components/ProjectsSection.vue';
+import FooterSection from './components/FooterSection.vue';
 
 
 </script>
@@ -20,6 +21,7 @@ import ProjectsSection from './components/ProjectsSection.vue';
   <Stacks />
   <CTA />
   <FaqSection />
+  <FooterSection />
 </template>
 
 <style scoped>

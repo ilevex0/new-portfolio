@@ -53,7 +53,7 @@ const stackCategories = [
 </script>
 
 <template>
-  <section ref="stackSection" id="stack" class="stack-section is-visible">
+  <section ref="stackSection" id="skills" class="stack-section is-visible">
     <div class="stack-container">
       
       <!-- Header Invertido -->
