@@ -16,8 +16,12 @@ app.use(router)
 
 // Configuração do Google Analytics
 const gtag = createGtag({
-  config: { id: 'G-458PLV96VT' }
-}, router)
+    tagId: 'G-458PLV96VT',
+    pageTracker: {
+        router
+    }
+})
 
 app.use(gtag)
+
 app.mount('#app')
