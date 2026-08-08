@@ -11,12 +11,12 @@ import './assets/main.css'
 
 const app = createApp(App)
 
+app.use(createPinia())
+app.use(router)
+
 // Configuração do Google Analytics
 app.use(VueGtag, {
   config: { id: 'G-458PLV96VT' }
 }, router)
-
-app.use(createPinia())
-app.use(router)
 
 app.mount('#app')
